@@ -70,6 +70,13 @@ func NewConn() (*Conn, error) {
 			return nil, ErrNoAgent
 		}
 		sockFile := path.Join(currentUser.HomeDir, ".gnupg", "S.gpg-agent")
+		IsSocket := func(path string) bool {
+			fileInfo, err := os.Stat(path)
+			if err != nil {
+				return false
+			}
+			return fileInfo.Mode().Type() == fs.ModeSocket
+		}
 		if runtimeDir, ok := os.LookupEnv("XDG_RUNTIME_DIR"); IsSocket(sockFile) == false && ok {
 			sockFile = path.Join(runtimeDir, "gnupg/S.gpg-agent")
 		}
@@ -197,12 +204,4 @@ func (c *Conn) GetPassphrase(pr *PassphraseRequest) (passphrase string, outerr e
 		}
 	}
 	return "", errors.New(line)
-}
-
-func IsSocket(path string) bool {
-	fileInfo, err := os.Stat(path)
-	if err != nil {
-		return false
-	}
-	return fileInfo.Mode().Type() == fs.ModeSocket
 }
