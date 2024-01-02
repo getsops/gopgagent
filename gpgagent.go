@@ -78,7 +78,7 @@ func NewConn() (*Conn, error) {
 			return fileInfo.Mode().Type() == fs.ModeSocket
 		}
 		if runtimeDir, ok := os.LookupEnv("XDG_RUNTIME_DIR"); IsSocket(sockFile) == false && ok {
-			sockFile = path.Join(runtimeDir, "gnupg/S.gpg-agent")
+			sockFile = path.Join(runtimeDir, "gnupg", "S.gpg-agent")
 		}
 		addr = &net.UnixAddr{Net: "unix", Name: sockFile}
 	}
