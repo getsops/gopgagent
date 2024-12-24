@@ -26,6 +26,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io/fs"
 
 	"io"
 	"net"
@@ -68,6 +69,16 @@ func NewConn() (*Conn, error) {
 			return nil, ErrNoAgent
 		}
 		sockFile := path.Join(currentUser.HomeDir, ".gnupg", "S.gpg-agent")
+		IsSocket := func(path string) bool {
+			fileInfo, err := os.Stat(path)
+			if err != nil {
+				return false
+			}
+			return fileInfo.Mode().Type() == fs.ModeSocket
+		}
+		if runtimeDir, ok := os.LookupEnv("XDG_RUNTIME_DIR"); IsSocket(sockFile) == false && ok {
+			sockFile = path.Join(runtimeDir, "gnupg", "S.gpg-agent")
+		}
 		addr = &net.UnixAddr{Net: "unix", Name: sockFile}
 	}
 	uc, err := net.DialUnix("unix", nil, addr)
